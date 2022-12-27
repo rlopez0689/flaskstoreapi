@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  web:
+    build:
+      context: .
+    container_name: flask-store-api
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/app
+    command: "flask run --host 0.0.0.0 --port 8080"
+
+  worker:
+    build:
+      context: .
+    container_name: worker
+    volumes:
+      - ./:/app
+    command: "rq worker -u redis://redis:6379 emails"
+    depends_on:
+      - redis
+    links:
+      - redis
+
+  redis:
+    image: redis:6.2-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis:/redis
